@@ -39,7 +39,7 @@ goto start
 :: 从云端拉取函数
 :pull_from_cloud
 echo 正在从云端拉取代码...
-git pull 2>&1 | findstr /v "Already up to date."
+git pull 2>&1
 if %errorlevel% equ 0 (
     echo 拉取成功！
 ) else (
