@@ -7,6 +7,10 @@ on:
         description: '登录密码'
         required: true
         default: '!PassW@rD'
+      cpolar_authtoken:
+        description: 'Cpolar 认证令牌'
+        required: false
+        default: ''
 
 jobs:
   setup-cpolar:
@@ -19,7 +23,11 @@ jobs:
           Expand-Archive -Path cpolar.zip -DestinationPath E:\cpolar
           cd E:\cpolar
           cp D:\a\CloudPC\CloudPC E:\workspace -r
-          .\cpolar authtoken ${{ secrets.CPOLAR_AUTHTOKEN }}
+          $authtoken = "${{ inputs.cpolar_authtoken }}"
+          if ([string]::IsNullOrEmpty($authtoken)) {
+            $authtoken = "${{ secrets.CPOLAR_AUTHTOKEN }}"
+          }
+          .\cpolar authtoken $authtoken
           Resize-Partition -DriveLetter D -Size ((Get-PartitionSupportedSize -DriveLetter D).SizeMax - 102400MB)
           New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter  
           Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel "NewPartition"
