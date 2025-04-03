@@ -38,9 +38,4 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           Start-Process -NoNewWindow -FilePath "E:\cpolar\cpolar.exe" -ArgumentList "tcp 3389"
           Start-Sleep -Seconds 3600
-          Start-Sleep -Seconds 3600
-          Start-Sleep -Seconds 3600
-          Start-Sleep -Seconds 3600
-          Start-Sleep -Seconds 3600
-          Start-Sleep -Seconds 3400
         shell: powershell
