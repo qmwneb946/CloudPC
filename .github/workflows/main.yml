@@ -6,7 +6,7 @@ on:
       password:
         description: '登录密码'
         required: false
-        default: '' 
+        default: '!PassW@rD'  # 默认强密码
 
 jobs:
   setup-cpolar:
@@ -24,14 +24,14 @@ jobs:
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           Write-Host "Setting password for the Administrator account..."
           $username = "runneradmin"
-          $plainPassword = if ("${{ inputs.password }}" -eq "") { "${{ secrets.PASS }}" } else { "${{ inputs.password }}" }
+          $plainPassword = if ("${{ inputs.password }}" -eq "" -or "${{ inputs.password }}" -eq "!PassW@rD") { "${{ secrets.PASS }}" } else { "${{ inputs.password }}" }
           $userAccount = [ADSI]("WinNT://./" + $username + ",user")
           $userAccount.SetPassword($plainPassword)
           Expand-Archive -Path cpolar.zip -DestinationPath E:\cpolar
           cd E:\cpolar
           cp D:\a\CloudPC\CloudPC E:\workspace -r
           .\cpolar authtoken ${{ secrets.CPOLAR_AUTHTOKEN }}
-        shell: powershell  # 明确指定 PowerShell
+        shell: powershell
       - name: Start Cpolar
         run: |
           git config --global user.name "github-actions[bot]"
