@@ -2,7 +2,11 @@ name: Setup Cpolar on Windows
 
 on:
   workflow_dispatch:
-
+    inputs:
+      password:
+        description: '登录密码'
+        required: false 
+        default: ''
 jobs:
   setup-cpolar:
     runs-on: windows-latest
