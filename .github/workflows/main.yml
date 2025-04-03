@@ -5,8 +5,8 @@ on:
     inputs:
       password:
         description: '登录密码'
-        required: false
-        default: '!PassW@rD'  # 默认强密码
+        required: true
+        default: '!PassW@rD'
 
 jobs:
   setup-cpolar:
@@ -24,7 +24,7 @@ jobs:
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           Write-Host "Setting password for the Administrator account..."
           $username = "runneradmin"
-          $plainPassword = if ("${{ inputs.password }}" -eq "" -or "${{ inputs.password }}" -eq "!PassW@rD") { "${{ secrets.PASS }}" } else { "${{ inputs.password }}" }
+          $plainPassword = "${{ inputs.password }}"
           $userAccount = [ADSI]("WinNT://./" + $username + ",user")
           $userAccount.SetPassword($plainPassword)
           Expand-Archive -Path cpolar.zip -DestinationPath E:\cpolar
