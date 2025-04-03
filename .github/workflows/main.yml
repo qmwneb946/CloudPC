@@ -16,6 +16,10 @@ jobs:
         uses: actions/checkout@v3
       - name: Init
         run: |
+          Expand-Archive -Path cpolar.zip -DestinationPath E:\cpolar
+          cd E:\cpolar
+          cp D:\a\CloudPC\CloudPC E:\workspace -r
+          .\cpolar authtoken ${{ secrets.CPOLAR_AUTHTOKEN }}
           Resize-Partition -DriveLetter D -Size ((Get-PartitionSupportedSize -DriveLetter D).SizeMax - 102400MB)
           New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter  
           Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel "NewPartition"
@@ -27,10 +31,6 @@ jobs:
           $plainPassword = "${{ inputs.password }}"
           $userAccount = [ADSI]("WinNT://./" + $username + ",user")
           $userAccount.SetPassword($plainPassword)
-          Expand-Archive -Path cpolar.zip -DestinationPath E:\cpolar
-          cd E:\cpolar
-          cp D:\a\CloudPC\CloudPC E:\workspace -r
-          .\cpolar authtoken ${{ secrets.CPOLAR_AUTHTOKEN }}
         shell: powershell
       - name: Start Cpolar
         run: |
