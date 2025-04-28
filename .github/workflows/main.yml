@@ -25,14 +25,13 @@ jobs:
           New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter  
           Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel "NewPartition"
           
-          Expand-Archive -Path cpolar.zip -DestinationPath E:\cpolar
-          cd E:\cpolar
-          cp D:\a\CloudPC\CloudPC E:\workspace -r
+          Expand-Archive -Path cpolar.zip -DestinationPath C:\cpolar
+          rm D:\a\CloudPC\CloudPC\.git -r -f
           $authtoken = "${{ inputs.cpolar_authtoken }}"
           if ([string]::IsNullOrEmpty($authtoken)) {
             $authtoken = "${{ secrets.CPOLAR_AUTHTOKEN }}"
           }
-          .\cpolar authtoken $authtoken
+          C:\cploar\cpolar authtoken $authtoken
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\' -Name "fDenyTSConnections" -Value 0
           Write-Host "Configuring firewall to allow Remote Desktop..."
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
