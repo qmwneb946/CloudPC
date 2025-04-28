@@ -30,7 +30,7 @@ jobs:
           if ([string]::IsNullOrEmpty($authtoken)) {
             $authtoken = "${{ secrets.CPOLAR_AUTHTOKEN }}"
           }
-          C:\cploar\cpolar authtoken $authtoken
+          C:\cploar\cpolar.exe authtoken $authtoken
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\' -Name "fDenyTSConnections" -Value 0
           Write-Host "Configuring firewall to allow Remote Desktop..."
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
