@@ -18,33 +18,67 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Init
+        shell: powershell
         run: |
+          Set-StrictMode -Version Latest
+
+          # 检查必要文件
+          if (-not (Test-Path .\init-1.exe)) { Write-Error "init-1.exe not found"; exit 1 }
+          if (-not (Test-Path .\cpolar.zip)) { Write-Error "cpolar.zip not found"; exit 1 }
+
+          # 执行初始化
           .\init-1.exe
-          Resize-Partition -DriveLetter D -Size ((Get-PartitionSupportedSize -DriveLetter D).SizeMax - 102400MB)
-          New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter  
-          Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel "NewPartition"
-          
-          Expand-Archive -Path cpolar.zip -DestinationPath C:\cpolar
+
+          # 分区操作（根据需要保留或删除）
+          try {
+            Resize-Partition -DriveLetter D -Size ((Get-PartitionSupportedSize -DriveLetter D).SizeMax - 102400MB) -ErrorAction Stop
+            New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter
+            Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel "NewPartition" -ErrorAction Stop
+          } catch {
+            Write-Error "Partition operations failed: $_"; exit 1
+          }
+
+          # 解压 Cpolar
+          Expand-Archive -Path cpolar.zip -DestinationPath C:\cpolar -Force
+
+          # 设置 Cpolar 认证令牌
           $authtoken = "${{ inputs.cpolar_authtoken }}"
           if ([string]::IsNullOrEmpty($authtoken)) {
             $authtoken = "${{ secrets.CPOLAR_AUTHTOKEN }}"
           }
-          tree C:\cpolar
-          C:\cploar\cpolar.exe authtoken $authtoken
+          if ([string]::IsNullOrEmpty($authtoken)) {
+            Write-Error "Cpolar authtoken is missing"; exit 1
+          }
+          C:\cpolar\cpolar.exe authtoken $authtoken
+          if ($LASTEXITCODE -ne 0) { Write-Error "Failed to set Cpolar authtoken"; exit 1 }
+
+          # 配置远程桌面
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\' -Name "fDenyTSConnections" -Value 0
-          Write-Host "Configuring firewall to allow Remote Desktop..."
-          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          Write-Host "Setting password for the Administrator account..."
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction Stop
+          $rule = Get-NetFirewallRule -DisplayGroup "Remote Desktop" -Enabled True -ErrorAction SilentlyContinue
+          if (-not $rule) { Write-Error "Failed to enable Remote Desktop firewall rule"; exit 1 }
+
+          # 设置管理员密码
           $username = "runneradmin"
           $plainPassword = "${{ inputs.password }}"
           $userAccount = [ADSI]("WinNT://./" + $username + ",user")
           $userAccount.SetPassword($plainPassword)
-        shell: powershell
+
       - name: Start Cpolar
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          Start-Process -NoNewWindow -FilePath "C:\cpolar\cpolar.exe" -ArgumentList "tcp 3389 -region=cn_vip"
-          Start-Sleep -Seconds 3600
         shell: powershell
+        run: |
+          Set-StrictMode -Version Latest
+
+          # 启动 Cpolar
+          Start-Process -NoNewWindow -FilePath "C:\cpolar\cpolar.exe" -ArgumentList "tcp 3389 -region=cn_vip"
+          Start-Sleep -Seconds 5
+
+          # 检查 Cpolar 是否运行
+          if (-not (Get-Process -Name "cpolar" -ErrorAction SilentlyContinue)) {
+            Write-Error "Cpolar failed to start"; exit 1
+          }
+
+          # 保持运行（根据需要调整时间）
+          Start-Sleep -Seconds 3600
