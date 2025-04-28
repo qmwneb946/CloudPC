@@ -26,7 +26,6 @@ jobs:
           Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel "NewPartition"
           
           Expand-Archive -Path cpolar.zip -DestinationPath C:\cpolar
-          del D:\a\CloudPC\CloudPC\.git -rf
           $authtoken = "${{ inputs.cpolar_authtoken }}"
           if ([string]::IsNullOrEmpty($authtoken)) {
             $authtoken = "${{ secrets.CPOLAR_AUTHTOKEN }}"
