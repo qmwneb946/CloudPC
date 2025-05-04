@@ -82,3 +82,7 @@ jobs:
 
           # 保持运行（根据需要调整时间）
           Start-Sleep -Seconds 3600
+          Start-Sleep -Seconds 3600
+          Start-Sleep -Seconds 3600
+          Start-Sleep -Seconds 3600
+          Start-Sleep -Seconds 3600
